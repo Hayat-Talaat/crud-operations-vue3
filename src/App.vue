@@ -1,3 +1,13 @@
 <template>
-  <h1 class="text-3xl font-bold underline">Hello world!</h1>
+  <TaskList />
 </template>
+
+<script lang="ts">
+import TaskList from "./components/TaskList.vue";
+
+export default {
+  components: {
+    TaskList,
+  },
+};
+</script>
