@@ -108,7 +108,6 @@ const closeDialog = () => {
 const handleSubmit = () => {
   if (isUpdateMode.value) {
     emit("save", newTask.value);
-    console.log("newTask", newTask.value);
   } else {
     const newTaskWithId = {
       ...newTask.value,
