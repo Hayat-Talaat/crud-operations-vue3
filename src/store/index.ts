@@ -19,6 +19,13 @@ export default createStore<State>({
     addTask(state: State, task: Task) {
       state.tasks.push(task);
     },
+
+    updateTask(state: State, updatedTask: Task) {
+      const index = state.tasks.findIndex((task) => task.id === updatedTask.id);
+      if (index !== -1) {
+        state.tasks.splice(index, 1, updatedTask);
+      }
+    },
   },
   actions: {
     // Get Tasks
@@ -56,6 +63,22 @@ export default createStore<State>({
       });
       const newTask = await response.json();
       commit("addTask", newTask);
+    },
+
+    // Update a task
+    async updateTask({ commit }: { commit: Commit }, updatedTask: Task) {
+      const response = await fetch(
+        `http://localhost:3000/tasks/${updatedTask.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedTask),
+        }
+      );
+      const task = await response.json();
+      commit("updateTask", task);
     },
   },
   getters: {
