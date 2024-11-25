@@ -1,4 +1,4 @@
-import { createStore, Store } from "vuex";
+import { createStore, Store, Commit } from "vuex";
 import { Task } from "../types/task";
 
 interface State {
@@ -16,13 +16,19 @@ export default createStore<State>({
     deleteTask(state: State, taskId: number) {
       state.tasks = state.tasks.filter((task) => task.id !== taskId);
     },
+    addTask(state: State, task: Task) {
+      state.tasks.push(task);
+    },
   },
   actions: {
+    // Get Tasks
     async fetchTasks({ commit }: { commit: Store<State>["commit"] }) {
       const response = await fetch("http://localhost:3000/tasks");
       const tasks: Task[] = await response.json();
       commit("setTasks", tasks);
     },
+
+    // Delete Tasks
     async deleteTask(
       { commit }: { commit: Store<State>["commit"] },
       taskId: number
@@ -37,6 +43,19 @@ export default createStore<State>({
         console.error(error);
         alert("Failed to delete the task. Please try again.");
       }
+    },
+
+    // Create Tasks
+    async createTask({ commit }: { commit: Commit }, task: Task) {
+      const response = await fetch("http://localhost:3000/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+      });
+      const newTask = await response.json();
+      commit("addTask", newTask);
     },
   },
   getters: {

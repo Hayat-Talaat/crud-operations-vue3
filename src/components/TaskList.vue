@@ -1,6 +1,15 @@
 <template>
   <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Task List</h1>
+    <div class="flex justify-between">
+      <h1 class="text-2xl font-bold mb-4">Task List</h1>
+      <button
+        @click="isDialogOpen = true"
+        class="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        + Add Task
+      </button>
+    </div>
+
     <div
       v-for="task in tasks"
       :key="task.id"
@@ -20,14 +29,18 @@
         </button>
       </div>
     </div>
+
+    <TaskCreateDialog :isOpen="isDialogOpen" @close="isDialogOpen = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
+import TaskCreateDialog from "./TaskCreateDialog.vue";
 
 const store = useStore();
+const isDialogOpen = ref(false);
 
 onMounted(() => {
   store.dispatch("fetchTasks");
