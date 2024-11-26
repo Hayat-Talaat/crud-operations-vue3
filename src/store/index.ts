@@ -6,6 +6,8 @@ interface State {
   isLoading: boolean;
 }
 
+const API_URL = "http://localhost:3000/tasks";
+
 export default createStore<State>({
   state: {
     tasks: [],
@@ -14,6 +16,9 @@ export default createStore<State>({
   mutations: {
     setTasks(state: State, tasks: Task[]) {
       state.tasks = tasks;
+    },
+    setLoading(state: State, isLoading: boolean) {
+      state.isLoading = isLoading;
     },
     deleteTask(state: State, taskId: number) {
       state.tasks = state.tasks.filter((task) => task.id !== taskId);
@@ -32,16 +37,11 @@ export default createStore<State>({
   actions: {
     // Get Tasks
     async fetchTasks({ commit }: { commit: Commit }) {
-      commit("setLoading", true);
-      try {
-        const response = await fetch("http://localhost:3000/tasks");
-        const tasks: Task[] = await response.json();
+      await handleApiCall(commit, async () => {
+        const response = await fetch(API_URL);
+        const tasks = await response.json();
         commit("setTasks", tasks);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      } finally {
-        commit("setLoading", false);
-      }
+      });
     },
 
     // Delete Tasks
@@ -50,7 +50,7 @@ export default createStore<State>({
       taskId: number
     ) {
       try {
-        const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+        const response = await fetch(`${API_URL}/${taskId}`, {
           method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to delete task");
@@ -63,11 +63,9 @@ export default createStore<State>({
 
     // Create Tasks
     async createTask({ commit }: { commit: Commit }, task: Task) {
-      const response = await fetch("http://localhost:3000/tasks", {
+      const response = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(task),
       });
       const newTask = await response.json();
@@ -76,16 +74,13 @@ export default createStore<State>({
 
     // Update a task
     async updateTask({ commit }: { commit: Commit }, updatedTask: Task) {
-      const response = await fetch(
-        `http://localhost:3000/tasks/${updatedTask.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedTask),
-        }
-      );
+      const response = await fetch(`${API_URL}/${updatedTask.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedTask),
+      });
       const task = await response.json();
       commit("updateTask", task);
     },
@@ -94,3 +89,15 @@ export default createStore<State>({
     tasks: (state: State) => state.tasks,
   },
 });
+
+// Helper for API calls with loading state
+async function handleApiCall(commit: any, callback: () => Promise<void>) {
+  commit("setLoading", true);
+  try {
+    await callback();
+  } catch (error) {
+    console.error("API call failed:", error);
+  } finally {
+    commit("setLoading", false);
+  }
+}
