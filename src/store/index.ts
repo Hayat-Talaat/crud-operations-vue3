@@ -3,11 +3,13 @@ import { Task } from "../types/task";
 
 interface State {
   tasks: Task[];
+  isLoading: boolean;
 }
 
 export default createStore<State>({
   state: {
     tasks: [],
+    isLoading: false,
   },
   mutations: {
     setTasks(state: State, tasks: Task[]) {
@@ -29,10 +31,17 @@ export default createStore<State>({
   },
   actions: {
     // Get Tasks
-    async fetchTasks({ commit }: { commit: Store<State>["commit"] }) {
-      const response = await fetch("http://localhost:3000/tasks");
-      const tasks: Task[] = await response.json();
-      commit("setTasks", tasks);
+    async fetchTasks({ commit }: { commit: Commit }) {
+      commit("setLoading", true);
+      try {
+        const response = await fetch("http://localhost:3000/tasks");
+        const tasks: Task[] = await response.json();
+        commit("setTasks", tasks);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      } finally {
+        commit("setLoading", false);
+      }
     },
 
     // Delete Tasks

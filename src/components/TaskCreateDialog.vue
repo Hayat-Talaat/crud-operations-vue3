@@ -106,15 +106,20 @@ const closeDialog = () => {
 
 // Handle form submission (create or update)
 const handleSubmit = () => {
-  if (isUpdateMode.value) {
-    emit("save", newTask.value);
-  } else {
-    const newTaskWithId = {
-      ...newTask.value,
-      id: uuidv4(),
-    };
-    store.dispatch("createTask", newTaskWithId);
-    closeDialog();
+  try {
+    if (isUpdateMode.value) {
+      emit("save", newTask.value);
+    } else {
+      const newTaskWithId = {
+        ...newTask.value,
+        id: uuidv4(),
+      };
+      store.dispatch("createTask", newTaskWithId);
+      closeDialog();
+    }
+  } catch (error) {
+    console.error("Task submission failed:", error);
+    alert("An error occurred while saving the task.");
   }
 };
 
