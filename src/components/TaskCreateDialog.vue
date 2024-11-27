@@ -8,35 +8,54 @@
         {{ isUpdateMode ? "Update Task" : "Create New Task" }}
       </h2>
       <form @submit.prevent="handleSubmit">
+        <!-- Title Field -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Title</label>
+          <label class="block text-sm font-medium mb-1" for="title"
+            >Title</label
+          >
           <input
+            id="title"
             v-model="newTask.title"
             type="text"
             class="w-full border rounded px-2 py-1"
-            required
           />
+          <p v-if="errors.title" class="text-red-500 text-xs mt-1">
+            {{ errors.title }}
+          </p>
         </div>
+
+        <!-- Description Field -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Description</label>
+          <label class="block text-sm font-medium mb-1" for="description"
+            >Description</label
+          >
           <textarea
+            id="description"
             v-model="newTask.description"
             class="w-full border rounded px-2 py-1"
-            required
           ></textarea>
+          <p v-if="errors.description" class="text-red-500 text-xs mt-1">
+            {{ errors.description }}
+          </p>
         </div>
+
+        <!-- Status Field -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Status</label>
+          <label class="block text-sm font-medium mb-1" for="status"
+            >Status</label
+          >
           <select
+            id="status"
             v-model="newTask.status"
             class="w-full border rounded px-2 py-1"
-            required
           >
             <option value="todo">Todo</option>
             <option value="in progress">In Progress</option>
             <option value="done">Done</option>
           </select>
         </div>
+
+        <!-- Buttons -->
         <div class="flex justify-end gap-2">
           <button
             type="button"
@@ -84,6 +103,7 @@ const newTask = ref<Task>({
   description: "",
   status: "todo",
 });
+const errors = ref<Record<string, string>>({});
 
 // Watch for task prop and update form if task changes (for update mode)
 watch(
@@ -104,9 +124,26 @@ const closeDialog = () => {
   resetForm();
 };
 
+// Validate form inputs
+const validateForm = (): boolean => {
+  errors.value = {}; // Reset errors
+
+  if (!newTask.value.title) {
+    errors.value.title = "Title is required.";
+  }
+  if (!newTask.value.description) {
+    errors.value.description = "Description is required.";
+  }
+
+  // Return true if no errors
+  return Object.keys(errors.value).length === 0;
+};
 // Handle form submission (create or update)
 const handleSubmit = () => {
   try {
+    if (!validateForm()) {
+      return;
+    }
     if (isUpdateMode.value) {
       emit("save", newTask.value);
     } else {
@@ -126,5 +163,6 @@ const handleSubmit = () => {
 // Reset form after closing or saving
 const resetForm = () => {
   newTask.value = { id: 0, title: "", description: "", status: "todo" };
+  errors.value = {};
 };
 </script>
