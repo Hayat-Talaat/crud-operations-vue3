@@ -59,7 +59,7 @@ const isLoading = ref(false);
 const toggleTaskStatus = async () => {
   isLoading.value = true;
   try {
-    const updatedTask = {
+    const updatedTask: Task = {
       ...props.task,
       status: props.task.status === "done" ? "todo" : "done",
     };
