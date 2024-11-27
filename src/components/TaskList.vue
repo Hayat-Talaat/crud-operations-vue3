@@ -1,8 +1,13 @@
 <template>
   <div>
-    <div v-if="tasks.length === 0" class="text-center text-gray-500">
+    <div v-if="isLoading" class="text-center text-blue-500">
+      Loading tasks...
+    </div>
+
+    <div v-else-if="tasks.length === 0" class="text-center text-gray-500">
       No tasks available.
     </div>
+
     <div v-else>
       <div
         v-for="task in tasks"
@@ -29,7 +34,7 @@ import { Task } from "../types/task";
 import TaskActions from "./TaskActions.vue";
 import { useTask } from "../composable/useTask";
 
-const { tasks } = useTask();
+const { tasks, isLoading } = useTask();
 
 const emit = defineEmits<{
   (event: "openUpdateDialog", task: Task): void;
